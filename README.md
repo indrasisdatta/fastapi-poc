@@ -24,3 +24,13 @@ py -m pip freeze > requirements.txt
 ```bash
 py -m pip install -r requirements.txt
 ```
+
+### For file upload, install package:
+
+```bash
+py -m pip install python-multipart
+```
+
+[In buid Swagger doc for APIs](http://localhost:8000/docs)
+
+[Fast API Udemy course](https://cognizant.udemy.com/course/fastapi-the-complete-course/learn/lecture/29025340#overview)
