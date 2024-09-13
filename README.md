@@ -1,7 +1,7 @@
 # Create a POC using Fast API
 
 ```bash
-uv venv
+uv venv .venv
 ```
 
 Activate with: `bash.venv\Scripts\activate`
@@ -29,6 +29,12 @@ py -m pip install -r requirements.txt
 
 ```bash
 py -m pip install python-multipart
+```
+
+## To start the application:
+
+```bash
+uvicorn app.main:app --reload
 ```
 
 [In buid Swagger doc for APIs](http://localhost:8000/docs)
