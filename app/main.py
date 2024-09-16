@@ -14,5 +14,5 @@ def contact():
 def uploadFile(files: list[UploadFile]):
     print('Uploaded files: ', files)
 
-import uvicorn
-uvicorn.run(app)
+# import uvicorn
+# uvicorn.run(app)

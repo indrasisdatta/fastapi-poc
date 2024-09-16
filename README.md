@@ -9,26 +9,19 @@ Activate with: `bash.venv\Scripts\activate`
 ## For "pip module not found" error - run the below command
 
 ```bash
-py -m ensurepip --upgrade
+uv ensurepip --upgrade
 ```
 
 ## Install necessary modules and add to requirements.txt
 
 ```bash
-py -m pip install fastapi uvcorn
-py -m pip freeze > requirements.txt
+uv pip freeze > requirements.txt
 ```
 
 ## Other devs can install the dependencies in requirements.txt
 
 ```bash
-py -m pip install -r requirements.txt
-```
-
-### For file upload, install package:
-
-```bash
-py -m pip install python-multipart
+uv pip install -r requirements.txt
 ```
 
 ## To start the application:
