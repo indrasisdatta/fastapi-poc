@@ -1,11 +1,14 @@
 from fastapi import FastAPI, UploadFile
-# from .routes import items
+from .routes import items
 from .db import startup_db_client, shutdown_db_client
 
 app = FastAPI()
 
 app.add_event_handler('startup', startup_db_client)
 app.add_event_handler('shutdown', shutdown_db_client)
+
+# Include routes
+app.include_router(items.router, prefix="/items")
 
 @app.get('/')
 def home():
