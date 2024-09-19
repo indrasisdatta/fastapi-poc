@@ -7,14 +7,14 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 config = dotenv_values('.env')
 
 client: AsyncIOMotorClient = None
-collection = None 
+db = None 
 
 def startup_db_client():
-    global client, collection
+    global client, db
     try:
         client = MongoClient(config['DB_URL'])
-        collection = client.get_database('test')
-        logging.info(f"DB connection success: {collection}")
+        db = client.get_database('test')
+        logging.info(f"DB connection success: {db}")
     except Exception as e:
         logging.error(f"DB connection error: {e}")
 
@@ -25,3 +25,9 @@ def shutdown_db_client():
         print('DB connection closed')
     except Exception as e:
         logging.error(f"DB connection close error: {e}")
+
+def get_collection(collection_name: str):
+    global db
+    if db is None:
+        raise Exception('DB connection not initialized')
+    return db[collection_name]
