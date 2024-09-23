@@ -21,7 +21,7 @@ async def get_item(id: str):
         return item
     except Exception as e:
         logging.info(f"API exception caught: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=e.status_code, detail=str(e))
 
 @router.get('/', response_model=List[Item])
 async def get_items():
@@ -37,7 +37,7 @@ async def get_items():
         return items    
     except Exception as e:
         logging.info(f"API exception caught: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=e.status_code, detail=str(e))
     
 @router.post("/", response_model=Item)
 async def create_item(item: Item):    
@@ -51,7 +51,7 @@ async def create_item(item: Item):
             return inserted_item 
         raise HTTPException(status_code=404, detail="Item save failed")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=e.status_code, detail=str(e))
     
 @router.put("/{id}", response_model=Item)
 async def update_item(id: str, item: Item):
@@ -64,11 +64,21 @@ async def update_item(id: str, item: Item):
                     {"$set": item.model_dump()
                 })
         logging.info(f"Update status: {result}")
-        if result["modified_count"] == 0:
-            raise HTTPException(status_code=400, detail="Failed to update")
+        if result.matched_count == 0:
+            raise HTTPException(status_code=404, detail="No record found to update")
+        if result.modified_count == 0:
+            raise HTTPException(status_code=400, detail="Update failed")        
+
         updated_item = collection.find_one({ "_id": ObjectId(id)})
         if updated_item is not None:
             return updated_item 
         raise HTTPException(status_code=404, detail="Item save failed")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=e.status_code, detail=str(e))
+    
+@router.delete('/{id}', response_model = Item)
+def delete_item(id: str):
+    try:
+        raise HTTPException(status_code=404, detail="Item delete failed") 
+    except Exception as e:
+        raise HTTPException(status_code=e.status_code, detail=str(e))
