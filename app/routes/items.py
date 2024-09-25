@@ -1,20 +1,17 @@
 from fastapi import APIRouter, HTTPException
 from ..models.item import Item 
-from ..db import get_collection 
 from typing import List
 import logging
 from bson import ObjectId
+from ..helpers.collection_helper import get_collection_api
 
 router = APIRouter()
-
 COLLECTION_NAME = 'items'
 
 @router.get('/{id}', response_model=Item)
 async def get_item(id: str):
     try:
-        collection = get_collection(COLLECTION_NAME)
-        if collection is None:
-            raise HTTPException(status_code=404, detail="No collection found")
+        collection = get_collection_api(COLLECTION_NAME)
         item = collection.find_one({ "_id": ObjectId(id)})
         if not item:
             raise HTTPException(status_code=404, detail="Item not found")
@@ -26,9 +23,7 @@ async def get_item(id: str):
 @router.get('/', response_model=List[Item])
 async def get_items():
     try:
-        collection = get_collection(COLLECTION_NAME)
-        if collection is None:
-            raise HTTPException(status_code=404, detail="No collection found")
+        collection = get_collection_api(COLLECTION_NAME)
         logging.info(f"Collection: {collection}")
         items = list(collection.find())        
         logging.info(f"Items: {items}")
@@ -42,9 +37,7 @@ async def get_items():
 @router.post("/", response_model=Item)
 async def create_item(item: Item):    
     try:
-        collection = get_collection(COLLECTION_NAME)
-        if collection is None:
-            raise HTTPException(status_code=404, detail="No collection found")
+        collection = get_collection_api(COLLECTION_NAME)
         result = collection.insert_one(item.model_dump())
         inserted_item = collection.find_one({ "_id": ObjectId(result.inserted_id)})
         if inserted_item is not None:
@@ -56,9 +49,7 @@ async def create_item(item: Item):
 @router.put("/{id}", response_model=Item)
 async def update_item(id: str, item: Item):
     try:
-        collection = get_collection(COLLECTION_NAME)
-        if collection is None:
-            raise HTTPException(status_code=404, detail="No collection found")
+        collection = get_collection_api(COLLECTION_NAME)
         result = collection.update_one(
                     { "_id": ObjectId(id)}, 
                     {"$set": item.model_dump()
@@ -76,9 +67,18 @@ async def update_item(id: str, item: Item):
     except Exception as e:
         raise HTTPException(status_code=e.status_code, detail=str(e))
     
-@router.delete('/{id}', response_model = Item)
+@router.delete('/{id}')
 def delete_item(id: str):
     try:
-        raise HTTPException(status_code=404, detail="Item delete failed") 
+        collection = get_collection_api(COLLECTION_NAME)
+        # Check if id is valid
+        if not ObjectId.is_valid(id):
+            raise HTTPException(status_code=400, detail="Invalid item") 
+        result = collection.delete_one({ "_id": ObjectId(id) })
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Item not found") 
+        
+        return {"detail": f"Item with id {id} deleted successfully"}
+
     except Exception as e:
         raise HTTPException(status_code=e.status_code, detail=str(e))
