@@ -8,7 +8,7 @@ from ..helpers.collection_helper import get_collection_api
 router = APIRouter()
 COLLECTION_NAME = 'items'
 
-@router.get('/{id}', response_model=Item)
+@router.get('/{id}', response_model=Item, summary="Get all items", description="Fetches all items from the database.", tags=["Items"])
 async def get_item(id: str):
     try:
         collection = get_collection_api(COLLECTION_NAME)

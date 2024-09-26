@@ -8,7 +8,7 @@ app.add_event_handler('startup', startup_db_client)
 app.add_event_handler('shutdown', shutdown_db_client)
 
 # Include routes
-app.include_router(items.router, prefix="/items")
+app.include_router(items.router, prefix="/items", tags=["Items"])
 
 @app.get('/')
 def home():
