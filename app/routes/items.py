@@ -1,9 +1,11 @@
+from doctest import debug_script
 from fastapi import APIRouter, HTTPException
 from ..models.item import Item 
 from typing import List
 import logging
 from bson import ObjectId
 from ..helpers.collection_helper import get_collection_api
+from bson.errors import InvalidId
 
 router = APIRouter()
 COLLECTION_NAME = 'items'
@@ -11,11 +13,17 @@ COLLECTION_NAME = 'items'
 @router.get('/{id}', response_model=Item, summary="Get all items", description="Fetches all items from the database.", tags=["Items"])
 async def get_item(id: str):
     try:
+        # Check if id is valid object id
+        if not ObjectId.is_valid(id):
+            raise HTTPException(status_code=400, detail="Invalid item object id")
         collection = get_collection_api(COLLECTION_NAME)
         item = collection.find_one({ "_id": ObjectId(id)})
         if not item:
             raise HTTPException(status_code=404, detail="Item not found")
         return item
+    except InvalidId as e:
+        logging.error(f"Invalid ObjectId: {e}")
+        raise HTTPException(status_code=400, detail="Invalid item")
     except Exception as e:
         logging.info(f"API exception caught: {e}")
         raise HTTPException(status_code=e.status_code, detail=str(e))
@@ -49,6 +57,9 @@ async def create_item(item: Item):
 @router.put("/{id}", response_model=Item)
 async def update_item(id: str, item: Item):
     try:
+        # Check if id is valid object id
+        if not ObjectId.is_valid(id):
+            raise HTTPException(status_code=400, detail="Invalid item object id")
         collection = get_collection_api(COLLECTION_NAME)
         result = collection.update_one(
                     { "_id": ObjectId(id)}, 
